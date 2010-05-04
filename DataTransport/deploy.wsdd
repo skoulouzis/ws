@@ -1,0 +1,15 @@
+<deployment xmlns="http://xml.apache.org/axis/wsdd/"
+    xmlns:java="http://xml.apache.org/axis/wsdd/providers/java">
+
+<!--   <service name="DataTransportService" provider="java:RPC"> -->
+  <service name="DataTransportService" provider="java:RPC" streaming="on">
+    <parameter name="className" value="services.DataTransportService"/>
+    <parameter name="allowedMethods" value="*"/>    
+<!--     <parameter name="publish.Directory" value="/usr/local/lib/tomcat/webapps/axis/publishFiles"/> -->
+  </service>
+
+  <service name="SimleService" provider="java:RPC" streaming="on">
+    <parameter name="className" value="services.SimleService"/>
+    <parameter name="allowedMethods" value="*"/>
+  </service>
+</deployment>
