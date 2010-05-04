@@ -1,0 +1,31 @@
+#! /bin/sh
+
+USER=$2
+
+if [ -n "$USER" ]; then
+  echo "User is " $USER 
+else
+  USER=`id -un`
+  echo "User is " $USER 
+fi
+
+
+# ------------------ clean and build local-------------------------------
+cp /home/alogo/workspace/netbeans/WSDTF-0.0.5.Alpha/dist/lib/*.jar /home/alogo/workspace/netbeans/DataTransportServive/lib/
+cp /home/alogo/workspace/netbeans/WSDTF-0.0.5.Alpha/dist/WSDTF-0.0.5.Alpha.jar /home/alogo/workspace/netbeans/DataTransportServive/lib/
+
+ant clean
+ant install
+
+cp $CATALINA_HOME/webapps/axis/WEB-INF/server-config.wsdd $CATALINA_HOME/webapps/axis/WEB-INF/classes/services/
+
+$CATALINA_HOME/bin/restart.sh
+#-----------------------------------------------------------------------
+
+scp -r /home/alogo/workspace/netbeans/DataTransportServive $1:/home/$USER/workspace/netbeans/
+
+responce=`ssh -t $1 'source /etc/profile && source /home/$USER/.bashrc && ant install -f /home/$USER/workspace/netbeans/DataTransportServive/build.xml'`
+echo "$responce"
+
+responce=`ssh -t 192.168.1.13 source /home/alogo/.bashrc && $CATALINA_HOME/bin/restart.sh`
+echo "$responce"

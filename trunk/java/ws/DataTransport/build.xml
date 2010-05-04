@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<project name="WSTests" default="default" basedir=".">
+    <description>Builds, tests, and runs the project WSTests.</description>
+    <import file="nbproject/build-impl.xml"/>
+
+    <property name="manager.port"       value="8080"/>
+    <property environment="env"/>
+
+        <!-- Sanity checks -->
+
+     <target name="-pre-init">
+    
+      <echo message="manager.port:       	'${manager.port}'" />
+      <echo message="CATALINA_BASE:       	'${env.CATALINA_BASE}'" />
+
+          <fail message="You need to define a manager.port for deployment onto the Tomcat server">
+            <condition>
+              <or>
+                <not><length string="${manager.port}" when="greater" trim="true" length="0" /></not>
+                <not><isset property="manager.port"/></not>
+              </or>
+            </condition>
+          </fail>
+        </target>
+
+    <target name="default" depends="install" description="Build and test the whole project."/>
+    <target name="reload" depends="install"/>
+
+
+    <target name="install" depends="jar" description="Installs the whole project.">
+    <!--<target name="install" depends="test,jar,javadoc" description="Installs the whole project.">-->
+      <fail unless="env.CATALINA_BASE">You need to define the environment variable CATALINA_BASE, the directory in which Tomcat is located.</fail>
+      <path id="axis.classpath">
+        <fileset dir="${env.CATALINA_BASE}/webapps/axis/WEB-INF/lib">
+          <include name="**/*.jar" />
+        </fileset>
+      </path>
+
+      <taskdef resource="axis-tasks.properties" classpathref="axis.classpath" />
+
+      <axis-admin port="${manager.port}" hostname="localhost"
+                  failonerror="true" servletpath="/axis/services/AdminService"
+                  debug="true" xmlfile="deploy.wsdd" />
+
+      <copy todir="${env.CATALINA_BASE}/webapps/axis/WEB-INF/classes">
+        <fileset dir="${build.classes.dir}"/>
+      </copy>
+      <copy todir="${env.CATALINA_BASE}/webapps/axis/WEB-INF/lib">
+        <fileset dir="./lib/"/>
+      </copy>
+      <touch file="${env.CATALINA_BASE}/webapps/axis/WEB-INF/web.xml"/>
+    </target>
+
+    <target name="-do-clean">
+      <taskdef resource="axis-tasks.properties" classpathref="axis.classpath" />
+        <axis-admin port="${manager.port}" hostname="localhost"
+            failonerror="true" servletpath="/axis/services/AdminService"
+            debug="true" xmlfile="undeploy.wsdd" />
+        <delete includeEmptyDirs="true">
+            <!-- <fileset dir="${netbeans.user}/jakarta-tomcat-5.5.9_base/webapps/axis/WEB-INF/classes"> -->
+            <fileset dir="${env.CATALINA_BASE}/webapps/axis/WEB-INF/classes">
+                <present targetdir="${build.classes.dir}" />
+            </fileset>
+        </delete>
+
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+</project>
